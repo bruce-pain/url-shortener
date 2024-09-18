@@ -15,6 +15,7 @@ class User(BaseTableModel):
 
     profile = relationship("Profile", back_populates="user", uselist=False)
     activity_logs = relationship("ActivityLog", back_populates="user")
+    short_urls = relationship("ShortUrl", back_populates="user")
 
     def to_dict(self):
         obj_dict = super().to_dict()
