@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, title="URL Shortener")
+app = FastAPI(lifespan=lifespan, title="Kekere URL Shortener")
 
 # In-memory request counter by endpoint and IP address
 request_counter = defaultdict(lambda: defaultdict(int))

@@ -6,3 +6,5 @@ INVALID_PASSWORD = "Wrong user password"
 INVALID_CREDENTIALS = "Could not validate credentials"
 EXPIRED_REFRESH_TOKEN = "Refresh token expired"
 TOKEN_REFRESH_SUCCESSFUL = "Tokens refreshed succesfully"
+
+ALIAS_IN_USE = "This custom alias is currently in use, try something else!"
