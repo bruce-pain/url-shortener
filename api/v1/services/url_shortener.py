@@ -84,4 +84,9 @@ def get_target_url(db: Session, short_url: str) -> str:
         db.query(ShortUrl).filter(ShortUrl.short_code == short_url).first()
     )
 
+    if not short_url_object:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Invalid short code"
+        )
+
     return short_url_object.target_url

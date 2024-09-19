@@ -1,11 +1,12 @@
 import uvicorn
 from collections import defaultdict
+from typing import Annotated
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, status
-from fastapi import HTTPException, Request
+from fastapi import FastAPI, status, HTTPException, Request, Depends
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -13,6 +14,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from api.core.config import settings
 from api.utils.logger import logger
 from api.v1.routes.main import main_router
+from api.v1.services import url_shortener
+from api.db.database import get_db
 
 
 @asynccontextmanager
@@ -75,6 +78,15 @@ async def get_root(request: Request) -> dict:
 @app.get("/probe", tags=["Home"])
 async def probe():
     return {"message": "I am the Python FastAPI API responding"}
+
+
+@app.get(
+    path="/{short_code}",
+    response_class=RedirectResponse,
+    status_code=status.HTTP_301_MOVED_PERMANENTLY,
+)
+async def redirect_to_target(short_code: str, db: Annotated[Session, Depends(get_db)]):
+    return url_shortener.get_target_url(db=db, short_url=short_code)
 
 
 # REGISTER EXCEPTION HANDLERS
