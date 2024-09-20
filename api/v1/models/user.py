@@ -13,7 +13,6 @@ class User(BaseTableModel):
     first_name = Column(String)
     last_name = Column(String)
 
-    profile = relationship("Profile", back_populates="user", uselist=False)
     activity_logs = relationship("ActivityLog", back_populates="user")
     short_urls = relationship("ShortUrl", back_populates="user")
 

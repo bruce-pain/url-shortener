@@ -10,6 +10,6 @@ class ShortUrl(BaseTableModel):
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     target_url = Column(String, nullable=False)
     short_code = Column(String, nullable=False)
-    access_count = Column(Integer, nullable=True)
+    access_count = Column(Integer, nullable=True, default=0)
 
     user = relationship("User", back_populates="short_urls")
