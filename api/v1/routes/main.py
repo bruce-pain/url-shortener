@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from api.v1.routes.auth import auth
-from api.v1.routes.url_shortener import shorten
+from api.v1.routes.shorten import shorten
 
 main_router = APIRouter(prefix="/api/v1")
 

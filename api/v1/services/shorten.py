@@ -2,13 +2,12 @@ import string
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 from uuid_extensions import uuid7
 
 from api.core import response_messages
 from api.v1.models.short_urls import ShortUrl
 from api.v1.models.user import User
-from api.v1.schemas import url_shortener
+from api.v1.schemas import shorten
 
 # Base62 character set
 BASE62 = string.ascii_letters + string.digits
@@ -52,7 +51,7 @@ def generate_short_code(length: int = 7) -> str:
 
 
 def create_shortened_url(
-    db: Session, schema: url_shortener.CreateShortUrl, current_user: User
+    db: Session, schema: shorten.CreateShortUrl, current_user: User
 ) -> ShortUrl:
     target_url = schema.target_url
     custom_alias = schema.custom_alias
@@ -79,14 +78,45 @@ def create_shortened_url(
     return short_url
 
 
-def get_target_url(db: Session, short_url: str) -> str:
-    short_url_object = (
-        db.query(ShortUrl).filter(ShortUrl.short_code == short_url).first()
-    )
+def check_model_existence(db: Session, short_url: str):
+    """Checks if a model exists by its id"""
 
-    if not short_url_object:
+    obj = db.query(ShortUrl).filter(ShortUrl.short_code == short_url).first()
+
+    if not obj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Invalid short code"
         )
 
+    return obj
+
+
+def get_target_url(db: Session, short_url: str) -> str:
+    short_url_object = check_model_existence(db, short_url)
+
     return short_url_object.target_url
+
+
+def update_target_url(db: Session, short_url: str, new_target_url: str) -> ShortUrl:
+    short_url_object = check_model_existence(db, short_url)
+
+    short_url_object.target_url = new_target_url
+
+    db.commit()
+    db.refresh(short_url_object)
+
+
+def delete_short_url(db: Session, short_url: str):
+    short_url_object = check_model_existence(db, short_url)
+
+    db.delete(short_url_object)
+    db.commit()
+
+
+def increment_access_count(db: Session, short_url: str):
+    short_url_object = check_model_existence(db, short_url)
+
+    short_url_object.access_count += 1
+
+    db.commit()
+    db.refresh(short_url_object)

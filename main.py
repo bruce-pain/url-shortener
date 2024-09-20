@@ -14,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from api.core.config import settings
 from api.utils.logger import logger
 from api.v1.routes.main import main_router
-from api.v1.services import url_shortener
+from api.v1.services import shorten
 from api.db.database import get_db
 
 
@@ -86,7 +86,7 @@ async def probe():
     status_code=status.HTTP_301_MOVED_PERMANENTLY,
 )
 async def redirect_to_target(short_code: str, db: Annotated[Session, Depends(get_db)]):
-    return url_shortener.get_target_url(db=db, short_url=short_code)
+    return shorten.get_target_url(db=db, short_url=short_code)
 
 
 # REGISTER EXCEPTION HANDLERS

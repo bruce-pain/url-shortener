@@ -4,8 +4,8 @@ from typing import Annotated
 
 from api.db.database import get_db
 from api.core.dependencies.security import get_current_user
-from api.v1.services import url_shortener as url_service
-from api.v1.schemas import url_shortener as url_schema
+from api.v1.services import shorten as url_service
+from api.v1.schemas import shorten as url_schema
 from api.v1.models import User
 
 shorten = APIRouter(prefix="/shorten", tags=["Shortener"])
