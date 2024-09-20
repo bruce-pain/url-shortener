@@ -86,7 +86,9 @@ async def probe():
     status_code=status.HTTP_301_MOVED_PERMANENTLY,
 )
 async def redirect_to_target(short_code: str, db: Annotated[Session, Depends(get_db)]):
-    return shorten.get_target_url(db=db, short_url=short_code)
+    target = shorten.get_target_url(db=db, short_url=short_code)
+    shorten.increment_access_count(db=db, short_url=short_code)
+    return target
 
 
 # REGISTER EXCEPTION HANDLERS

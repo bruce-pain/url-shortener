@@ -78,10 +78,15 @@ def create_shortened_url(
     return short_url
 
 
-def check_model_existence(db: Session, short_url: str):
+def check_model_existence(db: Session, short_url: str, user: User = None):
     """Checks if a model exists by its id"""
 
-    obj = db.query(ShortUrl).filter(ShortUrl.short_code == short_url).first()
+    query = db.query(ShortUrl)
+
+    if user:
+        query = query.filter(ShortUrl.user_id == user.id)
+
+    obj = query.filter(ShortUrl.short_code == short_url).first()
 
     if not obj:
         raise HTTPException(
@@ -97,8 +102,12 @@ def get_target_url(db: Session, short_url: str) -> str:
     return short_url_object.target_url
 
 
-def update_target_url(db: Session, short_url: str, new_target_url: str) -> ShortUrl:
-    short_url_object = check_model_existence(db, short_url)
+def update_target_url(
+    db: Session, current_user: User, short_url: str, new_target_url: str
+) -> ShortUrl:
+    short_url_object = check_model_existence(
+        db=db, user=current_user, short_url=short_url
+    )
 
     short_url_object.target_url = new_target_url
 
@@ -106,17 +115,20 @@ def update_target_url(db: Session, short_url: str, new_target_url: str) -> Short
     db.refresh(short_url_object)
 
 
-def delete_short_url(db: Session, short_url: str):
-    short_url_object = check_model_existence(db, short_url)
+def delete_short_url(db: Session, current_user: User, short_url: str):
+    short_url_object = check_model_existence(
+        db=db, user=current_user, short_url=short_url
+    )
 
     db.delete(short_url_object)
     db.commit()
 
 
 def increment_access_count(db: Session, short_url: str):
-    short_url_object = check_model_existence(db, short_url)
+    short_url_object = check_model_existence(db=db, short_url=short_url)
 
-    short_url_object.access_count += 1
+    count = short_url_object.access_count
+    short_url_object.access_count = int(count) + 1
 
     db.commit()
     db.refresh(short_url_object)

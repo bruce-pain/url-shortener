@@ -50,3 +50,42 @@ def generate_url(
         message="Short URL generated successfully!",
         data=response_data,
     )
+
+
+@shorten.put(
+    path="/{short_url}",
+    response_model=url_schema.UpdateShortUrlResponse,
+    summary="Update the target url",
+    description="Endpoint to change the target url for a given short code",
+    status_code=status.HTTP_200_OK,
+)
+def update_url(
+    short_url: str,
+    schema: url_schema.UpdateShortUrl,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    url_service.update_target_url(
+        db=db,
+        current_user=current_user,
+        short_url=short_url,
+        new_target_url=schema.target_url,
+    )
+
+    return url_schema.UpdateShortUrlResponse(
+        status_code=status.HTTP_200_OK, message="Target url successfully updated!"
+    )
+
+
+@shorten.delete(
+    path="/{short_url}",
+    summary="Delete the short url",
+    description="Endpoint to delete the short url from the database",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_url(
+    short_url: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    url_service.delete_short_url(db=db, current_user=current_user, short_url=short_url)

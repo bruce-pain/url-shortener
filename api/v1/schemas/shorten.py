@@ -21,3 +21,11 @@ class ShortUrlData(BaseModel):
 
 class CreateShortUrlResponse(BaseResponseModel):
     data: ShortUrlData
+
+
+class UpdateShortUrl(BaseModel):
+    target_url: str
+
+
+class UpdateShortUrlResponse(BaseResponseModel):
+    pass
