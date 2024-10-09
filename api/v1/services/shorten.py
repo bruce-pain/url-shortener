@@ -96,10 +96,24 @@ def check_model_existence(db: Session, short_url: str, user: User = None):
     return obj
 
 
-def get_target_url(db: Session, short_url: str) -> str:
-    short_url_object = check_model_existence(db, short_url)
+def get_short_url(db: Session, short_url: str, current_user: User = None) -> ShortUrl:
+    short_url_object = check_model_existence(db, short_url, current_user)
 
-    return short_url_object.target_url
+    return short_url_object
+
+
+def get_all_short_urls(db: Session, current_user: User):
+    query = db.query(ShortUrl).filter(ShortUrl.user_id == current_user.id).all()
+
+    all_short_urls = [
+        shorten.ShortUrlData.model_validate(url, from_attributes=True) for url in query
+    ]
+
+    return shorten.AllShortUrlsResponse(
+        status_code=status.HTTP_200_OK,
+        message="All Short urls fetched successfully",
+        data=all_short_urls,
+    )
 
 
 def update_target_url(
@@ -114,6 +128,8 @@ def update_target_url(
     db.commit()
     db.refresh(short_url_object)
 
+    return short_url_object
+
 
 def delete_short_url(db: Session, current_user: User, short_url: str):
     short_url_object = check_model_existence(
@@ -127,8 +143,7 @@ def delete_short_url(db: Session, current_user: User, short_url: str):
 def increment_access_count(db: Session, short_url: str):
     short_url_object = check_model_existence(db=db, short_url=short_url)
 
-    count = short_url_object.access_count
-    short_url_object.access_count = int(count) + 1
+    short_url_object.access_count += 1
 
     db.commit()
     db.refresh(short_url_object)

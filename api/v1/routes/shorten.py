@@ -43,11 +43,58 @@ def generate_url(
         short_code=short_url.short_code,
         created_at=short_url.created_at,
         updated_at=short_url.updated_at,
+        access_count=short_url.access_count,
     )
 
     return url_schema.CreateShortUrlResponse(
         status_code=status.HTTP_201_CREATED,
         message="Short URL generated successfully!",
+        data=response_data,
+    )
+
+
+@shorten.get(
+    path="",
+    response_model=url_schema.AllShortUrlsResponse,
+    summary="Retrieve all short url",
+    description="Endpoint to retrieve all short url data for current user",
+    status_code=status.HTTP_200_OK,
+)
+def retrieve_all_url(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return url_service.get_all_short_urls(db=db, current_user=current_user)
+
+
+@shorten.get(
+    path="/{short_url}",
+    response_model=url_schema.UpdateShortUrlResponse,
+    summary="Retrieve short url",
+    description="Endpoint to retrieve short url data",
+    status_code=status.HTTP_200_OK,
+)
+def retrieve_url(
+    short_url: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    short_url = url_service.get_short_url(
+        db=db, short_url=short_url, current_user=current_user
+    )
+
+    response_data = url_schema.ShortUrlData(
+        id=short_url.id,
+        target_url=short_url.target_url,
+        short_code=short_url.short_code,
+        created_at=short_url.created_at,
+        updated_at=short_url.updated_at,
+        access_count=short_url.access_count,
+    )
+
+    return url_schema.UpdateShortUrlResponse(
+        status_code=status.HTTP_200_OK,
+        message="Target url retrieved successfully!",
         data=response_data,
     )
 
@@ -65,15 +112,26 @@ def update_url(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    url_service.update_target_url(
+    short_url = url_service.update_target_url(
         db=db,
         current_user=current_user,
         short_url=short_url,
         new_target_url=schema.target_url,
     )
 
+    response_data = url_schema.ShortUrlData(
+        id=short_url.id,
+        target_url=short_url.target_url,
+        short_code=short_url.short_code,
+        created_at=short_url.created_at,
+        updated_at=short_url.updated_at,
+        access_count=short_url.access_count,
+    )
+
     return url_schema.UpdateShortUrlResponse(
-        status_code=status.HTTP_200_OK, message="Target url successfully updated!"
+        status_code=status.HTTP_200_OK,
+        message="Target url successfully updated!",
+        data=response_data,
     )
 
 

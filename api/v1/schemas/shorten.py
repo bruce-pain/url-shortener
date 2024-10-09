@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from datetime import datetime
 from pydantic import BaseModel
@@ -17,6 +17,11 @@ class ShortUrlData(BaseModel):
     short_code: str
     created_at: datetime
     updated_at: datetime
+    access_count: int
+
+
+class AllShortUrlsResponse(BaseResponseModel):
+    data: List[ShortUrlData]
 
 
 class CreateShortUrlResponse(BaseResponseModel):
@@ -28,4 +33,4 @@ class UpdateShortUrl(BaseModel):
 
 
 class UpdateShortUrlResponse(BaseResponseModel):
-    pass
+    data: ShortUrlData
